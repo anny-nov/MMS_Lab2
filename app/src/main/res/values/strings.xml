@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">To-Do List</string>
+    <string name="add_task">Add Task</string>
+    <string name="new_task">New Task</string>
+    <string name="add">Add</string>
+    <string name="cancel">Cancel</string>
+    <string name="enter_task_title">Enter task title</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="type">Type</string>
+    <string name="enter_task_description">Enter task description</string>
+    <string name="due_date">Due Date</string>
+    <string name="date">dd.m.yyyy</string>
+    <string name="enter_task_type">Enter task type</string>
+    <string name="status">Status</string>
+    <string name="taskimage">TaskImage</string>
+    <string-array name="type">
+        <item>ToDo</item>
+        <item>E-mail</item>
+        <item>Phone Call</item>
+        <item>Meeting</item>
+    </string-array>
+</resources>
