@@ -4,12 +4,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private EditText new_description;
     private EditText new_duedate;
     private String type;
-    RecyclerView recyclerView;
+    public RecyclerView recyclerView;
 
     public static final String SHARED_PREFS = "sharedPrefs";
     public static final String SIZE = "SizeArray";
@@ -60,6 +66,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         LoadData();
         initRecyclerView();
 
+        ItemTouchHelper.Callback callback = new SimpleTaskCallback(myAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReciever,new IntentFilter("Item was deleted"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(myMessageReciever,new IntentFilter("Task is done"));
+
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,6 +94,30 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
     }
+
+    public BroadcastReceiver mMessageReciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int position = intent.getIntExtra("Deleted",-1);
+            if(position >= 0 && position<model.tasks.size())
+            {
+                model.tasks.remove(position);
+                SaveData();
+            }
+        }
+    };
+
+    public BroadcastReceiver myMessageReciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int position = intent.getIntExtra("Done",-1);
+            if(position >= 0 && position<model.tasks.size())
+            {
+                model.tasks.get(position).setStatus(false);
+                SaveData();
+            }
+        }
+    };
 
     public void SaveData()
     {
@@ -138,9 +175,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         MyAdapter.OnTaskClickListener onTaskClickListener = new MyAdapter.OnTaskClickListener() {
             @Override
             public void OnTaskClick(Task task) {
+                Log.d("TAG","The choosed task is " + Integer.toString(task.getId()));
                 Intent intent = new Intent(MainActivity.this,TaskInfoActivity.class);
+                Intent intent2 = new Intent("Chosen element");
                 model.current = task.getId();
                 SaveData();
+                intent2.putExtra("Chosen",task.getId());
+                LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent2);
                 startActivity(intent);
             }
         };
@@ -150,4 +191,5 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
     }
+
 }

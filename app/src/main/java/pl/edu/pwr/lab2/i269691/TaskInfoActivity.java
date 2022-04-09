@@ -2,11 +2,17 @@ package pl.edu.pwr.lab2.i269691;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class TaskInfoActivity extends AppCompatActivity {
     public static final String TASK = "TaskId";
@@ -36,8 +42,23 @@ public class TaskInfoActivity extends AppCompatActivity {
         status = (TextView) findViewById(R.id.status_info);
         description = (TextView) findViewById(R.id.description_info);
 
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessage,new IntentFilter("Chosen element"));
         SetData();
     }
+
+
+    public BroadcastReceiver mMessage = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int position = intent.getIntExtra("Chosen",-1);
+            Toast.makeText(TaskInfoActivity.this,Integer.toString(position),Toast.LENGTH_LONG);
+            if(position >= 0)
+            {
+                model.current=position;
+            }
+        }
+    };
+
 
     public void LoadData() {
         SharedPreferences sharedPreferences = getSharedPreferences(SHARED_PREFS, MODE_PRIVATE);
